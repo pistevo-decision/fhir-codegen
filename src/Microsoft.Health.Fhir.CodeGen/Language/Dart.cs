@@ -1182,11 +1182,11 @@ public class Dart : ILanguage
                     {
                         if (isOptional)
                         {
-                            parsedValue = $"(json['{jsonKey}'] as List<dynamic>?)?.map((e) => {elementTypes}.fromJson(e as Map<String, dynamic>)).toList()";
+                            parsedValue = $"(json['{jsonKey}'] as List<dynamic>?)?.map((e) => {elementTypes}.fromJson((e as Map).cast<String, dynamic>())).toList()";
                         }
                         else
                         {
-                            parsedValue = $"(json['{jsonKey}'] as List<dynamic>).map((e) => {elementTypes}.fromJson(e as Map<String, dynamic>)).toList()";
+                            parsedValue = $"(json['{jsonKey}'] as List<dynamic>).map((e) => {elementTypes}.fromJson((e as Map).cast<String, dynamic>())).toList()";
                         }
                     }
                 }
@@ -1206,22 +1206,22 @@ public class Dart : ILanguage
                 {
                     if (isOptional)
                     {
-                        parsedValue = $"json['{jsonKey}'] != null ? {hint.Alias}.fromJson(json['{jsonKey}'] as Map<String, dynamic>) : null";
+                        parsedValue = $"json['{jsonKey}'] != null ? {hint.Alias}.fromJson((json['{jsonKey}'] as Map).cast<String, dynamic>()) : null";
                     }
                     else
                     {
-                        parsedValue = $"{hint.Alias}.fromJson(json['{jsonKey}'] as Map<String, dynamic>)";
+                        parsedValue = $"{hint.Alias}.fromJson((json['{jsonKey}'] as Map).cast<String, dynamic>())";
                     }
                 }
                 else
                 {
                     if (isOptional)
                     {
-                        parsedValue = $"json['{jsonKey}'] != null ? {elementTypes}.fromJson(json['{jsonKey}'] as Map<String, dynamic>) : null";
+                        parsedValue = $"json['{jsonKey}'] != null ? {elementTypes}.fromJson((json['{jsonKey}'] as Map).cast<String, dynamic>()) : null";
                     }
                     else
                     {
-                        parsedValue = $"{elementTypes}.fromJson(json['{jsonKey}'] as Map<String, dynamic>)";
+                        parsedValue = $"{elementTypes}.fromJson((json['{jsonKey}'] as Map).cast<String, dynamic>())";
                     }
                 }
 
