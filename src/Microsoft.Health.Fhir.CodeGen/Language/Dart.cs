@@ -431,7 +431,7 @@ public class Dart : ILanguage
         // loop over exported resources
         foreach (string resource in _exportedResources)
         {
-            _writer.WriteLineIndented($"case {resource}.resourceType:");
+            _writer.WriteLineIndented($"case {resource}.fhirResourceType:");
             _writer.IncreaseIndent();
             _writer.WriteLineIndented($"return {resource}.fromJson(json);");
             _writer.DecreaseIndent();
@@ -925,15 +925,16 @@ public class Dart : ILanguage
             if (ShouldWriteResourceType(cd.Structure.Name))
             {
                 _exportedResources.Add(exportName);
+            }
 
-                _writer.WriteLineIndented("/// Resource Type Name (for serialization) ");
-                _writer.WriteLineIndented($"static const resourceType = '{cd.Structure.Name}';");
-            }
-            else
+            _writer.WriteLineIndented("/// Resource Type Name (for serialization) ");
+            _writer.WriteLineIndented($"static const fhirResourceType = '{cd.Structure.Name}';");
+            _writer.WriteLineIndented("/// Resource Type Name");
+            if (cd.Structure.Name != "Resource") // Resource is the base class
             {
-                _writer.WriteLineIndented("/// Resource Type Name (for serialization) ");
-                _writer.WriteLineIndented($"static const resourceType = '{cd.Structure.Name}';");
+                _writer.WriteLineIndented("@override");
             }
+            _writer.WriteLineIndented("String get resourceType => fhirResourceType;");
         }
 
         // write elements
@@ -943,7 +944,7 @@ public class Dart : ILanguage
 
         WriteFromJsonMethod(cd);
 
-        WriteToJsonMethod(cd);
+        WriteToJsonMethod(cd, isResource);
 
         WriteCopyWithMethod(cd);
 
@@ -1249,7 +1250,7 @@ public class Dart : ILanguage
         _writer.DecreaseIndent();
     }
 
-    private void WriteToJsonMethod(ComponentDefinition cd)
+    private void WriteToJsonMethod(ComponentDefinition cd, bool isResource = false)
     {
 
         // empty line
@@ -1267,6 +1268,11 @@ public class Dart : ILanguage
         _writer.WriteLineIndented("{");
         _writer.IncreaseIndent();
 
+        if (isResource)
+        {
+            _writer.WriteLineIndented("'resourceType': fhirResourceType,");
+        }
+
         foreach (ElementDefinition element in cd.Structure.cgElements(cd.Element.Path, true, false).OrderBy(e => e.Path))
         {
             Dictionary<string, string> values = NamesAndTypesForExport(element);
@@ -1278,6 +1284,10 @@ public class Dart : ILanguage
             {
                 isOptional = true;
             }
+
+            // add resourceType for resources if the class is a resource
+
+
 
             foreach ((string exportName, string elementTypes) in values)
             {
